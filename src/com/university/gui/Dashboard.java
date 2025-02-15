@@ -13,6 +13,11 @@ public class Dashboard extends JFrame {
         JButton btnEnroll = new JButton("Enroll Students");
         JButton btnAnalytics = new JButton("View Analytics");
 
+	// In the Dashboard constructor:
+	JButton btnEnroll = new JButton("Enroll Students");
+	btnEnroll.addActionListener(e -> new EnrollmentForm(Dashboard.this).setVisible(true));
+	panel.add(btnEnroll); // Replace previous enrollment button
+	
         panel.add(btnCourses);
         panel.add(btnEnroll);
         panel.add(btnAnalytics);
