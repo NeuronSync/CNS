@@ -9,6 +9,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.ArrayList;
 
 public class EnrollmentForm extends JDialog {
     private JComboBox<Student> studentCombo;
@@ -19,18 +20,28 @@ public class EnrollmentForm extends JDialog {
         super(parent, "Enroll Student", true);
         setLayout(new GridLayout(3, 2));
 
-        // Fetch students and courses from DB
+        // Fetch students and courses from DB with exception handling
         StudentDAO studentDAO = new StudentDAO();
         CourseDAO courseDAO = new CourseDAO();
-        List<Student> students = studentDAO.getAllStudents();
-        List<Course> courses = courseDAO.getAllCourses();
+        List<Student> students;
+        List<Course> courses;
+        try {
+            students = studentDAO.getAllStudents();
+            courses = courseDAO.getAllCourses();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error fetching data: " + ex.getMessage(), 
+                "Database Error", JOptionPane.ERROR_MESSAGE);
+            // Initialize with empty lists if there's an error
+            students = new ArrayList<>();
+            courses = new ArrayList<>();
+        }
 
         // Student dropdown
         studentCombo = new JComboBox<>(students.toArray(new Student[0]));
         studentCombo.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, 
-                boolean isSelected, boolean cellHasFocus) {
+                    boolean isSelected, boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 if (value instanceof Student) {
                     setText(((Student) value).getName());
@@ -44,7 +55,7 @@ public class EnrollmentForm extends JDialog {
         courseCombo.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, 
-                boolean isSelected, boolean cellHasFocus) {
+                    boolean isSelected, boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 if (value instanceof Course) {
                     setText(((Course) value).getCourseName());
@@ -85,3 +96,4 @@ public class EnrollmentForm extends JDialog {
         setLocationRelativeTo(parent);
     }
 }
+

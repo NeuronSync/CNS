@@ -6,12 +6,6 @@ import com.university.model.Course;
 import java.sql.*;
 
 public class EnrollmentDAO {
-
-	public int getPersonId() {
-	    return this.personId; // Ensure that personId is defined in your Student class.
-	}
-
-
     public void enrollStudent(Student student, Course course) throws SQLException {
         String sql = "INSERT INTO Enrollment (student_id, course_id) VALUES (?, ?)";
         try (Connection conn = DatabaseConnector.getConnection();
@@ -22,3 +16,4 @@ public class EnrollmentDAO {
         }
     }
 }
+
