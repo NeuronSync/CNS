@@ -1,12 +1,14 @@
 package com.university.model;
 
 public class Instructor extends Person {
-    public Instructor(String name, String email) {
-        super(name, email);
+
+    public Instructor(int personId, String name, String email) {
+        super(personId, name, email, "instructor");
     }
 
     @Override
     public void displayDetails() {
-        System.out.println("Instructor: " + name + " | Email: " + email);
+        System.out.println("Instructor: " + getName() + " | Email: " + getEmail());
     }
 }
+

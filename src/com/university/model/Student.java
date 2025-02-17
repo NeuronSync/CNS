@@ -5,13 +5,13 @@ public class Student extends Person {
 
     // Primary constructor that requires a personId
     public Student(int personId, String name, String email) {
-        super(name, email);
+        super(personId, name, email, "student");  // pass 'student' as the role
         this.personId = personId;
     }
 
     // Overloaded constructor for backwards compatibility (defaults personId to 0)
     public Student(String name, String email) {
-        this(0, name, email);
+        this(0, name, email);  // Default personId to 0
     }
 
     // Getter for personId (used by DAO)
@@ -24,19 +24,9 @@ public class Student extends Person {
         this.personId = personId;
     }
 
-    // Provide access to name (inherited from Person)
-    public String getName() {
-        return name;
-    }
-
-    // Provide access to email (inherited from Person)
-    public String getEmail() {
-        return email;
-    }
-
     @Override
     public void displayDetails() {
-        System.out.println("Student: " + name + " | Email: " + email);
+        System.out.println("Student: " + getName() + " | Email: " + getEmail());
     }
 }
 
