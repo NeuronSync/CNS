@@ -22,4 +22,14 @@ public class CourseDAO {
         }
         return courses;
     }
+	    public void addCourse(Course course) throws SQLException {
+	    String sql = "INSERT INTO Course (course_name, credits, instructor_id) VALUES (?, ?, ?)";
+	    try (Connection conn = DatabaseConnector.getConnection();
+	         PreparedStatement stmt = conn.prepareStatement(sql)) {
+	        stmt.setString(1, course.getCourseName());
+	        stmt.setInt(2, course.getCredits());
+	        stmt.setInt(3, course.getInstructor().getPersonId()); // Assume Instructor has getPersonId()
+	        stmt.executeUpdate();
+	    }
+	}
 }

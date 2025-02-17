@@ -15,6 +15,13 @@ public class Course {
         this.credits = credits;
     }
 
+    // Constructor with Instructor
+    public Course(String courseName, int credits, Instructor instructor) {
+        this.courseName = courseName;
+        this.credits = credits;
+        this.instructor = instructor;
+    }
+
     public int getCourseId() {
         return courseId;
     }

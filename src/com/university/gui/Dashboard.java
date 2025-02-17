@@ -19,13 +19,20 @@ public class Dashboard extends JFrame {
         JButton btnAnalytics = new JButton("View Analytics");
         JButton btnEnrollmentChart = new JButton("Enrollment Chart");
         JButton btnGradeChart = new JButton("Grade Distribution");
-
-        // Set button actions
+	JButton btnAddStudent = new JButton("Add Student");
+	JButton btnAddInstructor = new JButton("Add Instructor");
+	JButton btnAddCourse = new JButton("Add Course");
         btnEnroll.addActionListener(e -> new EnrollmentForm(Dashboard.this).setVisible(true));
+	btnAddStudent.addActionListener(e -> new StudentForm(Dashboard.this).setVisible(true));
+	btnAddInstructor.addActionListener(e -> new InstructorForm(Dashboard.this).setVisible(true));
         btnEnrollmentChart.addActionListener(e -> new EnrollmentAnalytics().generateChart());
         btnGradeChart.addActionListener(e -> new GradeAnalytics().generateChart());
+	btnAddCourse.addActionListener(e -> new CourseForm(Dashboard.this).setVisible(true));
+panel.add(btnAddCourse);
 
         // Add buttons in an organized way
+	panel.add(btnAddInstructor);
+	panel.add(btnAddStudent);
         panel.add(btnCourses);
         panel.add(btnEnroll);
         panel.add(btnAnalytics);
