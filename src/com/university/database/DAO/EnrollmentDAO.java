@@ -21,6 +21,28 @@ public class EnrollmentDAO {
         }
     }
 
+    // Method to get all enrollments (including grades)
+    public List<Enrollment> getAllEnrollments() throws SQLException {
+        List<Enrollment> enrollments = new ArrayList<>();
+        String sql = "SELECT e.enrollment_id, s.name AS student_name, c.course_name, e.grade " +
+                     "FROM Enrollment e " +
+                     "JOIN Person s ON e.student_id = s.person_id " +
+                     "JOIN Course c ON e.course_id = c.course_id";
+        try (Connection conn = DatabaseConnector.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                Enrollment enrollment = new Enrollment();
+                enrollment.setEnrollmentId(rs.getInt("enrollment_id"));
+                enrollment.setStudent(new Student(rs.getString("student_name"), ""));
+                enrollment.setCourse(new Course(rs.getString("course_name"), 0));
+                enrollment.setGrade(rs.getDouble("grade")); // Assume Enrollment has a grade field
+                enrollments.add(enrollment);
+            }
+        }
+        return enrollments;
+    }
+
     // Method to get all enrollments without grades
     public List<Enrollment> getEnrollmentsWithoutGrades() throws SQLException {
         List<Enrollment> enrollments = new ArrayList<>();
@@ -55,4 +77,3 @@ public class EnrollmentDAO {
         }
     }
 }
-
