@@ -1,19 +1,22 @@
 package com.university.gui;
 
-import com.university.database.DatabaseConnector;
-import org.mindrot.jbcrypt.BCrypt;
+import com.university.dao.UserDAO;
+import com.university.models.User;
+import com.university.auth.SessionManager;
 import javax.swing.*;
-import java.sql.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-public class LoginForm extends JDialog {
+public class LoginForm extends JFrame {
     private JTextField txtUsername = new JTextField(20);
     private JPasswordField txtPassword = new JPasswordField(20);
     private JButton btnLogin = new JButton("Login");
 
-    public LoginForm(JFrame parent) {
-        super(parent, "University System Login", true);
-        setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
+    public LoginForm() {
+        setTitle("University System Login");
         setSize(300, 200);
+        setLayout(new GridLayout(3, 2));
 
         add(new JLabel("Username:"));
         add(txtUsername);
@@ -23,33 +26,36 @@ public class LoginForm extends JDialog {
 
         btnLogin.addActionListener(e -> authenticateUser());
 
-        setLocationRelativeTo(parent);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
     }
 
     private void authenticateUser() {
         String username = txtUsername.getText();
         String password = new String(txtPassword.getPassword());
 
-        String sql = "SELECT password_hash FROM users WHERE username = ?";
-        
-        try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setString(1, username);
-            ResultSet rs = stmt.executeQuery();
+        User user = new UserDAO().authenticate(username, password);
 
-            if (rs.next() && BCrypt.checkpw(password, rs.getString("password_hash"))) {
-                dispose();
-                new Dashboard().setVisible(true);
-            } else {
-                JOptionPane.showMessageDialog(this, "Invalid credentials!");
+        if (user != null) {
+            SessionManager.setCurrentUser(user);
+            dispose();
+            switch (user.getRole()) {
+                case "admin":
+                    new AdminDashboard().setVisible(true);
+                    break;
+                case "instructor":
+                    new InstructorDashboard().setVisible(true);
+                    break;
+                case "student":
+                    new StudentDashboard().setVisible(true);
+                    break;
             }
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Database error: " + ex.getMessage());
+        } else {
+            JOptionPane.showMessageDialog(this, "Invalid credentials!");
         }
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new LoginForm(null).setVisible(true));
+        SwingUtilities.invokeLater(() -> new LoginForm().setVisible(true));
     }
 }
