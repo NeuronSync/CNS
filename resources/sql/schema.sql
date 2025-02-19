@@ -28,3 +28,10 @@ CREATE TABLE Enrollment (
     FOREIGN KEY (student_id) REFERENCES Person(person_id),
     FOREIGN KEY (course_id) REFERENCES Course(course_id)
 );
+
+-- Add users table for authentication
+CREATE TABLE IF NOT EXISTS users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL
+);

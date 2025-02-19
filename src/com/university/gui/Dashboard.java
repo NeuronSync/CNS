@@ -30,6 +30,9 @@ public class Dashboard extends JFrame {
         JButton btnAddInstructor = createStyledButton("Add Instructor");
         JButton btnAddCourse = createStyledButton("Add Course");
 	JButton btnUpdateGrades = createStyledButton("Update Grades");
+	JButton btnCourseManagement = createStyledButton("Manage Courses");
+	JButton btnAvgGrades = createStyledButton("View Average Grades");
+	JButton btnStudentGrades = createStyledButton("View Student Grades");
 
         // Button actions
         btnEnroll.addActionListener(e -> new EnrollmentForm(Dashboard.this).setVisible(true));
@@ -39,7 +42,10 @@ public class Dashboard extends JFrame {
         btnGradeChart.addActionListener(e -> new GradeAnalytics().generateChart());
         btnAddCourse.addActionListener(e -> new CourseForm(Dashboard.this).setVisible(true));
 	btnUpdateGrades.addActionListener(e -> new GradeForm(Dashboard.this).setVisible(true));
-panel.add(btnUpdateGrades);
+	panel.add(btnUpdateGrades);
+	btnCourseManagement.addActionListener(e -> new CourseManagementForm(this).setVisible(true));
+	btnAvgGrades.addActionListener(e -> GradeTable.showAverageGrades());
+	btnStudentGrades.addActionListener(e -> GradeTable.showStudentGrades());
 
         // Add buttons with GridBagLayout
         gbc.gridx = 0; gbc.gridy = 0;

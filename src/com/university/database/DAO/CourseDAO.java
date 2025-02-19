@@ -32,4 +32,15 @@ public class CourseDAO {
 	        stmt.executeUpdate();
 	    }
 	}
+
+	public void updateCourseInstructor(int courseId, int instructorId) throws SQLException {
+	    String sql = "UPDATE Course SET instructor_id = ? WHERE course_id = ?";
+	    try (Connection conn = DatabaseConnector.getConnection();
+	         PreparedStatement stmt = conn.prepareStatement(sql)) {
+	        stmt.setInt(1, instructorId);
+	        stmt.setInt(2, courseId);
+	        stmt.executeUpdate();
+	    }
+	}
+
 }
