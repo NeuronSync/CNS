@@ -8,25 +8,32 @@ import java.util.List;
 
 public class UserDAO {
 
-    // Authenticate User
-    public User authenticate(String username, String password) {
-        String sql = "SELECT user_id, username, password_hash, role, person_id FROM users WHERE username = ?";
+    // Authenticate User by Email
+    public User authenticateByEmail(String email, String password) {
+        String sql = "SELECT u.user_id, u.email, u.username, u.password_hash, r.role_name, u.failed_attempts, u.locked_until " +
+                     "FROM users u JOIN roles r ON u.role_id = r.role_id WHERE u.email = ?";
+
         try (Connection conn = DatabaseConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, username);
+            stmt.setString(1, email);
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
                 String storedHash = rs.getString("password_hash");
 
                 if (BCryptUtil.checkPassword(password, storedHash)) {
+                    resetFailedAttempts(email);
                     return new User(
                         rs.getInt("user_id"),
+                        rs.getString("email"),
                         rs.getString("username"),
-                        rs.getString("role"),
-                        rs.getInt("person_id")
+                        rs.getString("role_name"),
+                        rs.getInt("failed_attempts"),
+                        rs.getTimestamp("locked_until")
                     );
+                } else {
+                    incrementFailedAttempts(email);
                 }
             }
         } catch (SQLException e) {
@@ -35,17 +42,24 @@ public class UserDAO {
         return null;
     }
 
-    // Add User (Instructor/Student)
-    public boolean addUser(String username, String defaultPassword, String role) {
-        String hashedPassword = BCryptUtil.hashPassword(defaultPassword);
-        String sql = "INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)";
+    // Add User
+    public boolean addUser(String email, String username, String role, String password) {
+        int roleId = getRoleId(role);
+        if (roleId == -1) {
+            System.out.println("Invalid role: " + role);
+            return false;
+        }
+
+        String hashedPassword = BCryptUtil.hashPassword(password);
+        String sql = "INSERT INTO users (email, username, role_id, password_hash) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, username);
-            stmt.setString(2, hashedPassword);
-            stmt.setString(3, role);
+            stmt.setString(1, email);
+            stmt.setString(2, username);
+            stmt.setInt(3, roleId);
+            stmt.setString(4, hashedPassword);
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -54,10 +68,70 @@ public class UserDAO {
         return false;
     }
 
+    // Update User
+    public boolean updateUser(int userId, String email, String username, String role) {
+        int roleId = getRoleId(role);
+        if (roleId == -1) {
+            System.out.println("Invalid role: " + role);
+            return false;
+        }
+
+        String sql = "UPDATE users SET email = ?, username = ?, role_id = ? WHERE user_id = ?";
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, email);
+            stmt.setString(2, username);
+            stmt.setInt(3, roleId);
+            stmt.setInt(4, userId);
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // Delete User by ID
+    public boolean deleteUserById(int userId) {
+        String sql = "DELETE FROM users WHERE user_id = ?";
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, userId);
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // Get Role ID by Role Name
+    private int getRoleId(String roleName) {
+        String sql = "SELECT role_id FROM roles WHERE role_name = ?";
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, roleName);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("role_id");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
     // Get All Users
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
-        String sql = "SELECT user_id, username, role, person_id FROM users";
+        String sql = "SELECT u.user_id, u.email, u.username, r.role_name, u.failed_attempts, u.locked_until " +
+                     "FROM users u JOIN roles r ON u.role_id = r.role_id";
 
         try (Connection conn = DatabaseConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -66,9 +140,11 @@ public class UserDAO {
             while (rs.next()) {
                 users.add(new User(
                     rs.getInt("user_id"),
+                    rs.getString("email"),
                     rs.getString("username"),
-                    rs.getString("role"),
-                    rs.getInt("person_id")
+                    rs.getString("role_name"),
+                    rs.getInt("failed_attempts"),
+                    rs.getTimestamp("locked_until")
                 ));
             }
         } catch (SQLException e) {
@@ -78,15 +154,15 @@ public class UserDAO {
     }
 
     // Update Password
-    public boolean updatePassword(String username, String newPassword) {
+    public boolean updatePassword(String email, String newPassword) {
         String hashedPassword = BCryptUtil.hashPassword(newPassword);
-        String sql = "UPDATE users SET password_hash = ? WHERE username = ?";
+        String sql = "UPDATE users SET password_hash = ? WHERE email = ?";
 
         try (Connection conn = DatabaseConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, hashedPassword);
-            stmt.setString(2, username);
+            stmt.setString(2, email);
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -95,19 +171,45 @@ public class UserDAO {
         return false;
     }
 
-    // Delete User
-    public boolean deleteUser(String username) {
-        String sql = "DELETE FROM users WHERE username = ?";
+    // Delete User by Email
+    public boolean deleteUser(String email) {
+        String sql = "DELETE FROM users WHERE email = ?";
 
         try (Connection conn = DatabaseConnector.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, username);
+            stmt.setString(1, email);
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return false;
+    }
+
+    // Increment Failed Login Attempts
+    private void incrementFailedAttempts(String email) {
+        String sql = "UPDATE users SET failed_attempts = failed_attempts + 1 WHERE email = ?";
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, email);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Reset Failed Login Attempts
+    private void resetFailedAttempts(String email) {
+        String sql = "UPDATE users SET failed_attempts = 0, last_login = NOW() WHERE email = ?";
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, email);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -1,20 +1,30 @@
 package com.university.models;
 
+import java.sql.Timestamp;
+
 public class User {
     private int userId;
+    private String email;
     private String username;
     private String role;
-    private int personId;
+    private int failedAttempts;
+    private Timestamp lockedUntil;
 
-    public User(int userId, String username, String role, int personId) {
+    public User(int userId, String email, String username, String role, int failedAttempts, Timestamp lockedUntil) {
         this.userId = userId;
+        this.email = email;
         this.username = username;
         this.role = role;
-        this.personId = personId;
+        this.failedAttempts = failedAttempts;
+        this.lockedUntil = lockedUntil;
     }
 
     public int getUserId() {
         return userId;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     public String getUsername() {
@@ -25,7 +35,11 @@ public class User {
         return role;
     }
 
-    public int getPersonId() {
-        return personId;
+    public int getFailedAttempts() {
+        return failedAttempts;
+    }
+
+    public Timestamp getLockedUntil() {
+        return lockedUntil;
     }
 }

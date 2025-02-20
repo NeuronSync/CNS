@@ -1,87 +1,66 @@
-package com.university.gui;
-
-import com.university.dao.UserDAO;
-import com.university.models.User;
+package com.university.gui.admin;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.List;
 
 public class AdminDashboard extends JFrame {
-    private UserDAO userDAO;
 
     public AdminDashboard() {
-        userDAO = new UserDAO();
-
         setTitle("Admin Dashboard");
-        setSize(500, 400);
+        setSize(600, 400);
+        setLayout(new GridLayout(3, 2, 10, 10));
+
+        JButton btnUserManagement = new JButton("User Management");
+        JButton btnCourseManagement = new JButton("Course Management");
+        JButton btnEnrollmentManagement = new JButton("Enrollment Management");
+        JButton btnInstructorAssignment = new JButton("Instructor Assignment");
+        JButton btnAnalyticsReporting = new JButton("Analytics & Reporting");
+        JButton btnLogout = new JButton("Logout");
+
+        btnUserManagement.addActionListener(e -> openUserManagement());
+        btnCourseManagement.addActionListener(e -> openCourseManagement());
+        btnEnrollmentManagement.addActionListener(e -> openEnrollmentManagement());
+        btnInstructorAssignment.addActionListener(e -> openInstructorAssign());
+        btnAnalyticsReporting.addActionListener(e -> openAnalyticsReporting());
+        btnLogout.addActionListener(e -> logout());
+
+        add(btnUserManagement);
+        add(btnCourseManagement);
+        add(btnEnrollmentManagement);
+        add(btnInstructorAssignment);
+        add(btnAnalyticsReporting);
+        add(btnLogout);
+
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-
-        // Buttons
-        JButton addInstructorBtn = new JButton("Add Instructor");
-        JButton addStudentBtn = new JButton("Add Student");
-        JButton viewUsersBtn = new JButton("View Users");
-        JButton resetPasswordBtn = new JButton("Reset Password");
-        JButton deleteUserBtn = new JButton("Delete User");
-
-        // Action Listeners
-        addInstructorBtn.addActionListener(e -> addUser("Instructor", "Instructor"));
-        addStudentBtn.addActionListener(e -> addUser("Student", "Student"));
-        viewUsersBtn.addActionListener(e -> viewUsers());
-        resetPasswordBtn.addActionListener(e -> resetPassword());
-        deleteUserBtn.addActionListener(e -> deleteUser());
-
-        // Layout
-        setLayout(new GridLayout(5, 1, 10, 10));
-        add(addInstructorBtn);
-        add(addStudentBtn);
-        add(viewUsersBtn);
-        add(resetPasswordBtn);
-        add(deleteUserBtn);
     }
 
-    // Add Instructor or Student
-    private void addUser(String role, String defaultPassword) {
-        String username = JOptionPane.showInputDialog(this, "Enter " + role + " Username:");
-        if (username != null && !username.trim().isEmpty()) {
-            boolean success = userDAO.addUser(username, defaultPassword, role);
-            JOptionPane.showMessageDialog(this, success ? role + " Added Successfully!" : "Error Adding " + role);
-        }
+    private void openUserManagement() {
+        new UserManagement().setVisible(true);
     }
 
-    // View All Users
-    private void viewUsers() {
-        List<User> users = userDAO.getAllUsers();
-        StringBuilder userList = new StringBuilder("User List:\n");
-        for (User user : users) {
-            userList.append(user.getUserId()).append(" - ")
-                    .append(user.getUsername()).append(" (").append(user.getRole()).append(")\n");
-        }
-        JOptionPane.showMessageDialog(this, userList.toString());
+    private void openCourseManagement() {
+        new CourseManagement().setVisible(true);
     }
 
-    // Reset Password
-    private void resetPassword() {
-        String username = JOptionPane.showInputDialog(this, "Enter Username to Reset Password:");
-        if (username != null && !username.trim().isEmpty()) {
-            String newPassword = JOptionPane.showInputDialog(this, "Enter New Password:");
-            if (newPassword != null && !newPassword.trim().isEmpty()) {
-                boolean success = userDAO.updatePassword(username, newPassword);
-                JOptionPane.showMessageDialog(this, success ? "Password Reset Successfully!" : "Error Resetting Password");
-            }
-        }
+    private void openEnrollmentManagement() {
+        new EnrollmentManagement().setVisible(true);
     }
 
-    // Delete User
-    private void deleteUser() {
-        String username = JOptionPane.showInputDialog(this, "Enter Username to Delete:");
-        if (username != null && !username.trim().isEmpty()) {
-            boolean success = userDAO.deleteUser(username);
-            JOptionPane.showMessageDialog(this, success ? "User Deleted Successfully!" : "Error Deleting User");
-        }
+    private void openInstructorAssign() {
+        new InstructorAssign().setVisible(true);
+    }
+
+    private void openAnalyticsReporting() {
+        new AnalyticsReporting().setVisible(true);
+    }
+
+    private void logout() {
+        JOptionPane.showMessageDialog(this, "Logged out successfully.");
+        dispose();
+        new com.university.gui.LoginForm().setVisible(true);
     }
 
     public static void main(String[] args) {
