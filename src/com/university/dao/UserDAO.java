@@ -1,5 +1,6 @@
 package com.university.dao;
 
+import com.university.dao.DatabaseConnector;
 import com.university.models.User;
 import com.university.auth.BCryptUtil;
 import java.sql.*;
@@ -212,4 +213,23 @@ public class UserDAO {
             e.printStackTrace();
         }
     }
+
+    public int getInstructorId(String email) {
+	    int instructorId = -1;
+	    String query = "SELECT instructor_id FROM instructors WHERE user_id = (SELECT user_id FROM users WHERE email = ?)";
+
+	    try (Connection conn = DatabaseConnector.getConnection();
+	         PreparedStatement stmt = conn.prepareStatement(query)) {
+	        stmt.setString(1, email);
+	        ResultSet rs = stmt.executeQuery();
+
+	        if (rs.next()) {
+	            instructorId = rs.getInt("instructor_id");
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	    return instructorId;
+	}
+
 }

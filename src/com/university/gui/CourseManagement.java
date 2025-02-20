@@ -16,7 +16,7 @@ public class CourseManagement extends JFrame {
 
     public CourseManagement() {
         courseDAO = new CourseDAO();
-        
+
         setTitle("Course Management");
         setSize(600, 400);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -25,7 +25,7 @@ public class CourseManagement extends JFrame {
         JPanel panel = new JPanel(new BorderLayout());
 
         // Table for displaying courses
-        model = new DefaultTableModel(new String[]{"ID", "Name", "Code", "Credits"}, 0);
+        model = new DefaultTableModel(new String[]{"ID", "Name", "Code", "Department", "Credits"}, 0);
         table = new JTable(model);
         loadCourses();
 
@@ -55,7 +55,7 @@ public class CourseManagement extends JFrame {
         model.setRowCount(0);
         List<Course> courses = courseDAO.getAllCourses();
         for (Course course : courses) {
-            model.addRow(new Object[]{course.getCourseId(), course.getCourseName(), course.getCourseCode(), course.getCredits()});
+            model.addRow(new Object[]{course.getCourseId(), course.getCourseName(), course.getCourseCode(), course.getDepartment(), course.getCredits()});
         }
     }
 
@@ -63,10 +63,18 @@ public class CourseManagement extends JFrame {
     private void addCourse(ActionEvent e) {
         String name = JOptionPane.showInputDialog("Course Name:");
         String code = JOptionPane.showInputDialog("Course Code:");
-        int credits = Integer.parseInt(JOptionPane.showInputDialog("Credits:"));
+        String department = JOptionPane.showInputDialog("Department:");  // ✅ Added missing department
         String description = JOptionPane.showInputDialog("Description:");
+        int credits;
 
-        if (courseDAO.addCourse(name, code, description, credits)) {
+        try {
+            credits = Integer.parseInt(JOptionPane.showInputDialog("Credits:"));
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Invalid input for credits.");
+            return;
+        }
+
+        if (courseDAO.addCourse(name, code, description, department, credits)) {
             loadCourses();
         } else {
             JOptionPane.showMessageDialog(this, "Error adding course.");
@@ -84,10 +92,18 @@ public class CourseManagement extends JFrame {
         int courseId = (int) table.getValueAt(selectedRow, 0);
         String name = JOptionPane.showInputDialog("New Course Name:", table.getValueAt(selectedRow, 1));
         String code = JOptionPane.showInputDialog("New Course Code:", table.getValueAt(selectedRow, 2));
-        int credits = Integer.parseInt(JOptionPane.showInputDialog("New Credits:", table.getValueAt(selectedRow, 3)));
+        String department = JOptionPane.showInputDialog("New Department:", table.getValueAt(selectedRow, 3)); // ✅ Added department
         String description = JOptionPane.showInputDialog("New Description:");
+        int credits;
 
-        if (courseDAO.updateCourse(courseId, name, code, description, credits)) {
+        try {
+            credits = Integer.parseInt(JOptionPane.showInputDialog("New Credits:", table.getValueAt(selectedRow, 4)));
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Invalid input for credits.");
+            return;
+        }
+
+        if (courseDAO.updateCourse(courseId, name, code, description, department, credits)) {
             loadCourses();
         } else {
             JOptionPane.showMessageDialog(this, "Error updating course.");

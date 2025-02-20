@@ -34,24 +34,29 @@ public class LoginForm extends JFrame {
     }
 
     private void authenticateUser() {
-        String email = txtEmail.getText();
-        String password = new String(txtPassword.getPassword());
+        String email = txtEmail.getText().trim();
+        String password = new String(txtPassword.getPassword()).trim();
 
-        User user = new UserDAO().authenticateByEmail(email, password);
+        if (email.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Email and password are required!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        UserDAO userDAO = new UserDAO();
+        User user = userDAO.authenticateByEmail(email, password);
 
         if (user != null) {
-            // Check if account is locked
             if (isAccountLocked(user.getLockedUntil())) {
-                JOptionPane.showMessageDialog(this, "Account locked. Try again later.");
+                JOptionPane.showMessageDialog(this, "Account is locked. Try again later.", "Account Locked", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            // Successful login
+            // Set the logged-in user
             SessionManager.setCurrentUser(user);
             dispose();
-            openDashboard(user.getRole());
+            openDashboard(user);
         } else {
-            JOptionPane.showMessageDialog(this, "Invalid email or password!");
+            JOptionPane.showMessageDialog(this, "Invalid email or password!", "Login Failed", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -59,19 +64,22 @@ public class LoginForm extends JFrame {
         return lockedUntil != null && lockedUntil.toLocalDateTime().isAfter(LocalDateTime.now());
     }
 
-    private void openDashboard(String role) {
-        switch (role.toLowerCase()) {
+    private void openDashboard(User user) {
+        String role = user.getRole().toLowerCase();
+        
+        switch (role) {
             case "admin":
                 new AdminDashboard().setVisible(true);
                 break;
             case "instructor":
-                new InstructorDashboard().setVisible(true);
+                int instructorId = new UserDAO().getInstructorId(user.getEmail());
+                new InstructorDashboard(instructorId).setVisible(true);
                 break;
             case "student":
-                new StudentDashboard().setVisible(true);
+                new StudentDashboard(user.getUserId()).setVisible(true);
                 break;
             default:
-                JOptionPane.showMessageDialog(this, "Unknown role: " + role);
+                JOptionPane.showMessageDialog(this, "Unknown role: " + role, "Error", JOptionPane.ERROR_MESSAGE);
                 break;
         }
     }
@@ -80,3 +88,4 @@ public class LoginForm extends JFrame {
         SwingUtilities.invokeLater(() -> new LoginForm().setVisible(true));
     }
 }
+
