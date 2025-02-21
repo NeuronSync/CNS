@@ -67,8 +67,17 @@ public class StudentDashboard extends JFrame {
 }
 
     private void trackGrades() {
-        JOptionPane.showMessageDialog(this, "Feature: Track Grades for User ID: " + userId);
+    EnrollmentDAO enrollmentDAO = new EnrollmentDAO();  // Create an instance
+    List<String> grades = enrollmentDAO.getStudentGrades(userId);
+
+    if (grades.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "No grades available yet.");
+    } else {
+        String message = String.join("\n", grades);
+        JOptionPane.showMessageDialog(this, "Your Grades:\n" + message);
     }
+}
+
 
     private void accessStudyMaterials() {
         List<String> materials = StudyMaterialDAO.getMaterials();

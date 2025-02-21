@@ -109,4 +109,30 @@ public class EnrollmentDAO {
     }
     return courses;
 }
+
+public List<String> getStudentGrades(int studentId) {
+    List<String> grades = new ArrayList<>();
+    String sql = "SELECT c.course_name, c.course_code, e.grade " +
+                 "FROM enrollments e " +
+                 "JOIN courses c ON e.course_id = c.course_id " +
+                 "WHERE e.student_id = ?";
+
+    try (Connection conn = DatabaseConnector.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+        stmt.setInt(1, studentId);
+        ResultSet rs = stmt.executeQuery();
+
+        while (rs.next()) {
+            String courseName = rs.getString("course_name");
+            String courseCode = rs.getString("course_code");
+            String grade = (rs.getBigDecimal("grade") != null) ? rs.getBigDecimal("grade").toString() : "N/A";
+            grades.add(courseName + " (" + courseCode + ") - Grade: " + grade);
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return grades;
+}
 }
