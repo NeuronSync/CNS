@@ -1,12 +1,5 @@
 package com.university.gui.admin;
 
-//import com.university.dao.UserDAO;
-//import com.university.models.User;
-//import javax.swing.*;
-//import javax.swing.table.DefaultTableModel;
-//import java.awt.*;
-//import java.awt.event.ActionEvent;
-//import java.util.List;
 import com.university.dao.UserDAO;
 import com.university.models.User;
 import javax.swing.*;
