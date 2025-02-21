@@ -1,5 +1,6 @@
 package com.university.gui.student;
 
+import com.university.dao.EnrollmentDAO;
 import com.university.dao.StudyMaterialDAO;
 import javax.swing.*;
 import java.awt.*;
@@ -54,8 +55,16 @@ public class StudentDashboard extends JFrame {
     }
 
     private void viewEnrolledCourses() {
-        JOptionPane.showMessageDialog(this, "Feature: View Enrolled Courses for User ID: " + userId);
+    EnrollmentDAO enrollmentDAO = new EnrollmentDAO();  // Create an instance
+    List<String> courses = enrollmentDAO.getEnrolledCoursesByStudentId(userId);
+
+    if (courses.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "You are not enrolled in any courses.");
+    } else {
+        String message = String.join("\n", courses);
+        JOptionPane.showMessageDialog(this, "Your Enrolled Courses:\n" + message);
     }
+}
 
     private void trackGrades() {
         JOptionPane.showMessageDialog(this, "Feature: Track Grades for User ID: " + userId);

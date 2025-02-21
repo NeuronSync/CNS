@@ -83,4 +83,30 @@ public class EnrollmentDAO {
         }
         return enrollments;
     }
+
+    public List<String> getEnrolledCoursesByStudentId(int studentId) {
+    List<String> courses = new ArrayList<>();
+    String sql = "SELECT c.course_name, c.course_code, c.semester " +
+                 "FROM enrollments e " +
+                 "JOIN courses c ON e.course_id = c.course_id " +
+                 "WHERE e.student_id = ?";
+
+    try (Connection conn = DatabaseConnector.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+        stmt.setInt(1, studentId);
+        ResultSet rs = stmt.executeQuery();
+
+        while (rs.next()) {
+            String courseName = rs.getString("course_name");
+            String courseCode = rs.getString("course_code");
+            String semester = rs.getString("semester");
+            courses.add(courseName + " (" + courseCode + ") - " + semester);
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return courses;
+}
 }
