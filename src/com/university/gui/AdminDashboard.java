@@ -145,7 +145,7 @@ public class AdminDashboard extends JFrame {
 
         public BackgroundPanel() {
             try {
-                backgroundImage = new ImageIcon("lib/background.jpg").getImage();
+                backgroundImage = new ImageIcon("lib/admin.jpg").getImage();
             } catch (Exception e) {
                 setBackground(new Color(40, 40, 40));
             }

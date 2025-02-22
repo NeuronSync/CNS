@@ -133,14 +133,12 @@ public class LoginForm extends JFrame {
     }
 
     // Background panel with image
-    // Background panel with image
 private class BackgroundPanel extends JPanel {
     private BufferedImage backgroundImage;
 
     public BackgroundPanel() {
         try {
-            // Try loading from current directory first
-            File imageFile = new File("lib/background.jpg");
+            File imageFile = new File("lib/login.jpg");
             if (!imageFile.exists()) {
                 // Fallback to classpath resources
                 imageFile = new File(getClass().getClassLoader().getResource("background.jpg").getFile());
